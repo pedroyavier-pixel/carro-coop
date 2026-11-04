@@ -58,6 +58,7 @@ header{background:white}.head{display:flex;align-items:center;justify-content:sp
  .foot .wrap{gap:.7rem 1rem}
  .foot strong{width:100%}
 }
+.demo-label{display:inline-block;padding:.15rem .55rem;border-radius:.4rem;background:#fff0d2;color:#704306;font-weight:750;font-size:.75rem}.demo-card{border-top:1px solid var(--line);padding-top:.75rem}.demo-card h4{margin:.35rem 0}
 </style>
 </head>
 <body>
@@ -192,7 +193,7 @@ header{background:white}.head{display:flex;align-items:center;justify-content:sp
 <h2>¿Buscas un auto?</h2><p class="intro">Explora opciones de autos reposeídos de las cooperativas participantes en el inventario de Repo Coop.</p><a class="btn" href="https://repocooppr.com/">Ver autos disponibles</a>
 </div></section>
 <section id="ofertas-eventos" class="dots pad"><div class="wrap">
-<h2 class="center">Ofertas y eventos</h2><div class="grid">
+<h2 class="center">Ofertas y eventos</h2><p id="listings-demo-note" class="intro center">Los ejemplos marcados “For Position Only” son ficticios y se muestran para ilustrar la maqueta. Las cooperativas mencionadas no anunciaron estas promociones ni actividades.</p><div class="grid">
 <article class="card"><h3>Conoce las ofertas disponibles</h3><div id="featured-offers"></div><details id="ofertas"><summary>Ver ofertas</summary><div id="all-offers"></div></details></article>
 <article class="card"><h3>Entérate de nuestros próximos eventos</h3><div id="featured-events"></div><details id="eventos"><summary>Ver eventos</summary><div id="all-events"></div></details></article>
 </div></div></section>
@@ -241,6 +242,17 @@ const cooperatives = [{"name":"Cooperativa A/C Adjuntas (AdjuntasCoop) Oficina C
 // Completa estas listas con información aprobada. El directorio se amplía arriba.
 const offers = [];
 const events = [];
+// Fictional samples for the preview. These are separate from live listings.
+const demoOffers = [
+  {title:'Bono para tu primer auto', organizer:'NuestraCoop · San Juan', description:'Bono de $200 para aplicar al pronto de tu primer auto al financiarlo con la cooperativa.', starts:'2026-11-09', ends:'2026-11-30', terms:'Ejemplo para socios que financian su primer vehículo, sujeto a aprobación de crédito.'},
+  {title:'Tasación sin costo para tu trade-in', organizer:'Cabo Rojo Coop · Cabo Rojo', description:'Una tasación de cortesía para saber cuánto podrías aplicar al pronto al entregar tu auto usado.', starts:'2026-11-12', ends:'2026-12-12', terms:'Ejemplo limitado a una tasación por persona, mediante cita.'},
+  {title:'Hasta 60 días para tu primer pago', organizer:'Cooperativa Oriental · Humacao', description:'Escenario de financiamiento para auto nuevo con hasta 60 días antes del primer pago.', starts:'2026-11-16', ends:'2026-12-18', terms:'Ejemplo sujeto a aprobación. El interés se acumularía desde el desembolso.'}
+];
+const demoEvents = [
+  {title:'Taller Tu primer auto', organizer:'NuestraCoop', description:'Aprende a preparar un presupuesto y a comparar el costo total de distintas opciones de financiamiento.', starts:'2026-11-14T10:00:00-04:00', ends:'2026-11-14T12:00:00-04:00', place:'San Juan · Área metro'},
+  {title:'Encuentro de autos del oeste', organizer:'Cabo Rojo Coop', description:'Demostración de cómo inspeccionar un auto usado y preparar una lista de preguntas antes de comprar.', starts:'2026-11-21T09:00:00-04:00', ends:'2026-11-21T14:00:00-04:00', place:'Cabo Rojo · Oeste'},
+  {title:'Clínica de financiamiento sobre ruedas', organizer:'Cooperativa Oriental', description:'Una sesión práctica para simular pagos, estimar el pronto y revisar los documentos de una solicitud.', starts:'2026-12-05T10:00:00-04:00', ends:'2026-12-05T13:00:00-04:00', place:'Humacao · Este'}
+];
 const municipalities = 'Adjuntas|Aguada|Aguadilla|Aguas Buenas|Aibonito|Añasco|Arecibo|Arroyo|Barceloneta|Barranquitas|Bayamón|Cabo Rojo|Caguas|Camuy|Canóvanas|Carolina|Cataño|Cayey|Ceiba|Ciales|Cidra|Coamo|Comerío|Corozal|Culebra|Dorado|Fajardo|Florida|Guánica|Guayama|Guayanilla|Guaynabo|Gurabo|Hatillo|Hormigueros|Humacao|Isabela|Jayuya|Juana Díaz|Juncos|Lajas|Lares|Las Marías|Las Piedras|Loíza|Luquillo|Manatí|Maricao|Maunabo|Mayagüez|Moca|Morovis|Naguabo|Naranjito|Orocovis|Patillas|Peñuelas|Ponce|Quebradillas|Rincón|Río Grande|Sabana Grande|Salinas|San Germán|San Juan|San Lorenzo|San Sebastián|Santa Isabel|Toa Alta|Toa Baja|Trujillo Alto|Utuado|Vega Alta|Vega Baja|Vieques|Villalba|Yabucoa|Yauco'.split('|');
 const articles = [
   {title:'Qué revisar antes de comprar un auto usado', image:'car', summary:'Prepara una lista para comparar vehículos con calma.', body:'Pide el historial del vehículo, verifica que el número de identificación coincida con los documentos y coordina una inspección independiente. Usa la prueba de manejo para detectar ruidos y comprobar frenos, dirección y aire acondicionado. Anota el precio final y las reparaciones pendientes para comparar el costo de cada opción.'},
@@ -362,7 +374,7 @@ selectMunicipality('');
 const zone = 'America/Puerto_Rico';
 const offerDate = new Intl.DateTimeFormat('es-PR',{dateStyle:'medium',timeZone:zone});
 const eventDate = new Intl.DateTimeFormat('es-PR',{dateStyle:'medium',timeStyle:'short',timeZone:zone});
-function showListing(target, items, kind, empty) {
+function showListing(target, items, kind, empty, demo=false) {
   target.replaceChildren();
   if (!items.length) target.append(element('p',empty,'muted'));
   for (const entry of items) {
@@ -371,6 +383,10 @@ function showListing(target, items, kind, empty) {
     const formatter = offer ? offerDate : eventDate;
     const suffix = offer ? 'T12:00:00-04:00' : '';
     const schedule = [entry.starts,entry.ends].map(date => formatter.format(new Date(date+suffix))).join(' al ');
+    if (demo) {
+      node.classList.add('demo-card');
+      node.append(element('span','FOR POSITION ONLY · EJEMPLO FICTICIO','demo-label'));
+    }
     node.append(element('h4',entry.title),element('p',entry.description),
       element('p',entry.organizer+' · '+schedule),
       element('p',offer ? 'Condiciones: '+entry.terms : 'Lugar: '+entry.place));
@@ -386,9 +402,13 @@ function renderListings() {
   const today = [date.year,date.month,date.day].join('-');
   const active = offers.filter(entry => entry.starts <= today && entry.ends >= today).sort((a,b) => b.starts.localeCompare(a.starts));
   const upcoming = events.filter(entry => new Date(entry.ends) >= now).sort((a,b) => new Date(a.starts)-new Date(b.starts));
+  byId('listings-demo-note').hidden = active.length > 0 && upcoming.length > 0;
   for (const [key,items,kind,empty] of [['offers',active,'offer','No hay ofertas vigentes publicadas.'],['events',upcoming,'event','No hay próximos eventos publicados.']]) {
-    showListing(byId('featured-'+key),items.slice(0,1),kind,empty);
-    showListing(byId('all-'+key),items,kind,empty);
+    const demo = items.length === 0;
+    const details = byId(key === 'offers' ? 'ofertas' : 'eventos');
+    details.hidden = demo;
+    showListing(byId('featured-'+key),demo ? (key === 'offers' ? demoOffers : demoEvents) : items.slice(0,1),kind,empty,demo);
+    if (!demo) showListing(byId('all-'+key),items,kind,empty);
   }
 }
 renderListings();
