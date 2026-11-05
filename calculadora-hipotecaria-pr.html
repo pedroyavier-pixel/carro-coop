@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="es-PR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Calcula el pago mensual de una vivienda en Puerto Rico y compáralo con tu ingreso.">
+<title>Calculadora hipotecaria | Puerto Rico</title>
+<style>
+:root{color-scheme:light;--ink:#142b32;--muted:#496269;--line:#dbe6e3;--accent:#00675a;--paper:#fff;font:16px/1.5 system-ui,-apple-system,sans-serif;color:var(--ink);background:#eff5f2}
+*{box-sizing:border-box}body{margin:0}main{max-width:1120px;margin:auto;padding:44px 24px 36px}
+header{margin-bottom:26px}h1,h2,h3,p{margin:0}h1{font-size:clamp(2.25rem,6vw,4.25rem);line-height:1.02;letter-spacing:-.065em;margin:12px 0}h2{font-size:1.2rem;letter-spacing:-.02em;margin-bottom:14px}h3{font-size:1.05rem;margin-bottom:10px}p,.muted{color:var(--muted)}header p{max-width:62ch}.eyebrow{font-size:.74rem;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:start}.card{background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:24px;box-shadow:0 8px 24px #173c3310;min-width:0}.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.wide{grid-column:1/-1}
+label{display:flex;flex-direction:column;gap:6px;font-size:.82rem;font-weight:700}input,select,button{font:inherit}input,select{color:var(--ink);width:100%;min-width:0;border:1px solid #b9cbc6;border-radius:10px;background:#fbfdfc;padding:10px 9px;font-size:1rem;min-height:44px}select{padding-right:18px}:focus-visible{outline:3px solid #167f72;outline-offset:2px}
+button{cursor:pointer;border:0;border-radius:10px;padding:12px 16px;font-weight:750;color:#fff;background:var(--accent)}button:hover{background:#004f46}button:disabled{opacity:.55;cursor:default}.primary{width:100%;margin-top:18px}.secondary{background:#e3f2ed;color:#005748}.secondary:hover{background:#cbe9df}
+details{border-top:1px solid var(--line);margin-top:16px;padding-top:13px}summary{cursor:pointer;font-weight:750}details .fields,details p{margin-top:12px}.small{font-size:.81rem}.subtle{margin-top:8px}.check{display:flex;flex-direction:row;align-items:center;gap:8px}.check input{width:18px;min-height:0;height:18px}
+.hero{color:#fff;background:linear-gradient(125deg,#15393b,#005a4b);border-radius:16px;padding:21px;margin-bottom:22px;overflow-wrap:anywhere}.hero p{color:#d7ede6}.total{display:block;font-size:clamp(2.1rem,6vw,3.7rem);font-weight:800;line-height:1.15;letter-spacing:-.055em;font-variant-numeric:tabular-nums;margin:4px 0}
+.bars{list-style:none;margin:0;padding:0;display:grid;gap:11px}.bar-label,.row{display:flex;align-items:baseline;justify-content:space-between;gap:10px;font-size:.88rem}.bar-label strong,.row dd{font-variant-numeric:tabular-nums;text-align:right;margin:0;overflow-wrap:anywhere}.track{height:7px;background:#edf3f1;border-radius:9px;margin-top:4px;overflow:hidden}.bar{display:block;height:100%;border-radius:inherit;background:var(--bar)}
+.initial{border-top:1px solid var(--line);padding-top:15px;margin-top:20px}.initial dl{margin:0 0 14px}.row{padding:5px 0}.row.emphasis{font-weight:750}.status{min-height:1.4em;margin-top:6px}
+.evaluation{margin-top:18px}.assessment{background:#eef4f2;border:1px solid #dce8e4;border-left:5px solid #7e9893;border-radius:12px;padding:14px;margin-top:13px}.assessment strong{display:block}.assessment p{color:inherit;margin-top:4px}.assessment[data-color="green"]{background:#e5f6eb;color:#145533;border-color:#268456}.assessment[data-color="yellow"]{background:#fff3d5;color:#654600;border-color:#bb830b}.assessment[data-color="red"]{background:#fdebea;color:#822b28;border-color:#bb514b}
+.evaluation .fields{max-width:620px}.evaluation details .fields{max-width:none}.table-wrap{margin-top:15px}table{border-collapse:collapse;width:100%;text-align:left;font-size:.85rem}caption{text-align:left;color:var(--muted);padding-bottom:5px}th,td{padding:8px 5px;border-bottom:1px solid var(--line)}.pill{font-weight:750;white-space:nowrap}.green{color:#14613a}.yellow{color:#795300}.red{color:#932d2a}
+footer{padding:6px 3px 0}footer a{color:var(--accent)}[hidden]{display:none!important}
+@media(max-width:740px){main{padding:26px 14px}.grid{grid-template-columns:1fr}.card{padding:17px}.hero{padding:16px}}@media(max-width:345px){.fields{grid-template-columns:1fr}}
+</style>
+</head>
+<body><main>
+<header>
+<div class="eyebrow">Puerto Rico · Estimador independiente</div>
+<h1>Calculadora hipotecaria</h1>
+<p>Calcula tu pago mensual, el efectivo para el cierre y cómo la compra encaja en tu presupuesto.</p>
+</header>
+<div class="grid">
+<section class="card" aria-labelledby="property-title">
+<h2 id="property-title">Tu propiedad</h2>
+<form id="mortgage">
+<div class="fields">
+<label class="wide">Valor de la propiedad ($)<input id="price" type="number" inputmode="decimal" min="1" max="100000000" step="any" value="200000" required></label>
+<label class="wide">Tipo de préstamo<select id="type"><option value="fha">FHA</option><option value="conventional">Convencional</option><option value="usda">USDA Rural</option><option value="va">VA (veteranos elegibles)</option></select></label>
+<label>Plazo<select id="term"><option value="30">30 años</option><option value="20">20 años</option><option value="15">15 años</option></select></label>
+<label>Interés anual (%)<input id="rate" type="number" inputmode="decimal" min="0" max="100" step="any" value="4.95" required></label>
+<label>Pronto (%)<input id="down" type="number" inputmode="decimal" min="0" max="100" step="any" value="3.5" required></label>
+<label>Seguro de propiedad anual (%)<input id="home" type="number" inputmode="decimal" min="0" max="100" step="any" value="0.5" required></label>
+<label>CRIM anual efectivo (%)<input id="tax" type="number" inputmode="decimal" min="0" max="100" step="any" value="0.5" required></label>
+<label>Mantenimiento mensual ($)<input id="hoa" type="number" inputmode="decimal" min="0" max="1000000" step="any" value="0" required></label>
+<label>Gastos de cierre (%)<input id="closing" type="number" inputmode="decimal" min="0" max="100" step="any" value="4" required></label>
+<label class="check" id="exempt-label" hidden><input id="exempt" type="checkbox"> Exento del cargo VA</label>
+</div>
+<button class="primary" type="submit">Calcular mi pago</button>
+<p class="small subtle" id="program-note">Puedes editar los valores iniciales de cada programa.</p>
+</form>
+</section>
+<section class="card" id="results" aria-labelledby="result-title">
+<div class="hero">
+<div class="eyebrow" id="result-title">Pago mensual estimado</div>
+<output class="total" id="total" form="mortgage">$0.00</output>
+<p class="small" id="summary"></p>
+</div>
+<div id="result-details">
+<h3>Desglose mensual</h3>
+<ul class="bars" id="breakdown" aria-label="Gráfica de barras del pago mensual"></ul>
+<div class="initial"><h3>Al comprar</h3><dl id="initial"></dl></div>
+</div>
+<button class="secondary" id="copy" type="button">Copiar estimado</button>
+<p id="copy-status" class="small status" role="status"></p>
+</section>
+</div>
+<section class="card evaluation" aria-labelledby="eval-title">
+<h2 id="eval-title">Semáforo de compra <span class="muted small">· Opcional</span></h2>
+<div class="fields">
+<label>Ingreso bruto mensual del hogar ($)<input id="income" type="number" inputmode="decimal" min="1" max="100000000" step="any" placeholder="Ej. 5,000"></label>
+<label>Otras deudas mensuales ($)<input id="debt" type="number" inputmode="decimal" min="0" max="100000000" step="any" placeholder="0 si no tienes"></label>
+</div>
+<details id="features-panel">
+<summary>Características de la propiedad</summary>
+<div class="fields" id="features"></div>
+</details>
+<div class="assessment" id="assessment" aria-live="polite"></div>
+<div class="table-wrap" id="income-ranges" hidden>
+<table>
+<caption id="range-caption"></caption>
+<thead><tr><th scope="col">Ingreso bruto mensual</th><th scope="col">Semáforo</th></tr></thead>
+<tbody id="range-body"></tbody>
+</table>
+</div>
+<details>
+<summary>Cómo se asigna el color</summary>
+<p class="small">Verde si la vivienda consume hasta 28% de tu ingreso bruto y, sumando otras deudas, hasta 36%. Amarillo si ambas cifras se mantienen dentro de 35% y 43%, respectivamente. Rojo si se supera cualquiera de esos últimos límites. Son criterios de esta herramienta. <a href="https://www.consumerfinance.gov/ask-cfpb/what-is-a-debt-to-income-ratio-en-1791/">Cómo se calcula la proporción de deuda</a>.</p>
+<p class="small">Con seis respuestas o más, la puntuación de características puede pasar un verde a amarillo. Se ponderan cuartos, baños y acceso a servicios. En el campo pesan más el terreno y el patio. El resultado es un filtro de presupuesto y características. Para evaluar el precio de mercado hacen falta ventas comparables y conocer la condición de la vivienda.</p>
+</details>
+</section>
+<footer>
+<details>
+<summary class="small">Supuestos de la estimación</summary>
+<p class="small">Tasas de ejemplo editables para crédito 750+ (noviembre de 2026): FHA 4.95%, convencional 6.50%, USDA 7.13% y VA 6.81%. Los resultados son aproximados. Consulta una cotización para conocer tu tasa, seguros y costos de cierre. El CRIM efectivo depende de la propiedad y posibles exoneraciones.</p>
+<p class="small">FHA incluye prima inicial financiada de 1.75% y prima mensual ilustrativa según plazo y pronto. USDA incluye cargo inicial de 1% y anual de 0.35%. VA usa el cargo de primer uso según el pronto y permite marcar exención. Para convencional se simula PMI de 0.60% anual con pronto menor de 20%. Las primas se estiman sobre el préstamo base al inicio. USDA y VA requieren elegibilidad.</p>
+<p class="small"><a href="https://answers.hud.gov/FHA/s/article/What-is-the-FHA-Mortgage-Insurance-Premium-structure-for-forward-mortgage-loans">FHA</a> · <a href="https://www.rd.usda.gov/programs-services/single-family-housing-programs/single-family-housing-guaranteed-loan-program">USDA</a> · <a href="https://www.va.gov/housing-assistance/home-loans/funding-fee-and-closing-costs/">VA</a></p>
+</details>
+</footer>
+</main>
+<script>
+'use strict';
+const get = id => document.getElementById(id);
+const number = id => get(id).valueAsNumber;
+const money = new Intl.NumberFormat('es-PR', {style:'currency', currency:'USD'});
+const whole = new Intl.NumberFormat('es-PR', {style:'currency', currency:'USD', maximumFractionDigits:0});
+const percent = new Intl.NumberFormat('es-PR', {style:'percent', maximumFractionDigits:1});
+const programs = {
+  fha:{name:'FHA', rate:4.95, down:3.5},
+  conventional:{name:'Convencional', rate:6.50, down:5},
+  usda:{name:'USDA Rural', rate:7.13, down:0},
+  va:{name:'VA', rate:6.81, down:0}
+};
+const yesNo = [['yes','Sí'], ['no','No']];
+const questions = [
+  ['area','¿Área metro, Dorado u otro pueblo bien desarrollado?',yesNo],
+  ['rooms','¿Cuántos cuartos tiene?',[['1','1'],['2','2'],['3','3 o más']]],
+  ['baths','¿Cuántos baños tiene?',[['1','1'],['1.5','1 y medio'],['2','2'],['3','3 o más']]],
+  ['terrace','¿Tiene terraza?',yesNo],
+  ['parking','¿Tiene marquesina?',yesNo],
+  ['gate','¿La urbanización tiene control de acceso?',yesNo],
+  ['shops','¿Está cerca de centros comerciales o supermercados?',yesNo],
+  ['yard','¿Tiene patio?',yesNo],
+  ['land','¿Cuánto terreno tiene?',[['0','Sin terreno adicional'],['.25','Menos de ½ cuerda'],['.5','½ a menos de 1 cuerda'],['1','1 a menos de 2 cuerdas'],['2','2 cuerdas o más']]],
+  ['rural','¿Queda en el campo?',yesNo]
+];
+for (const [id, label, options] of questions) {
+  const field = document.createElement('label');
+  field.textContent = label;
+  const select = document.createElement('select');
+  select.id = id;
+  select.add(new Option('Sin indicar', ''));
+  for (const [value, title] of options) select.add(new Option(title, value));
+  field.append(select);
+  get('features').append(field);
+}
+const titles = {green:'Buena opción para comprar', yellow:'Yo esperaría', red:'No es buena compra'};
+const term = get('term');
+let copyText = '';
+
+function selectProgram(reset) {
+  const kind = get('type').value;
+  if (reset) {
+    get('rate').value = programs[kind].rate.toFixed(2);
+    get('down').value = programs[kind].down;
+  }
+  for (const option of term.options) option.disabled = kind === 'usda' && option.value !== '30';
+  if (kind === 'usda') term.value = '30';
+  get('exempt-label').hidden = kind !== 'va';
+  get('program-note').textContent = kind === 'usda'
+    ? 'USDA Rural garantizado usa un plazo fijo de 30 años.'
+    : 'Puedes editar los valores iniciales de cada programa.';
+}
+function estimate({price, kind, years, rate, down, home, tax, hoa, closing, exempt}) {
+  const deposit = price * down / 100;
+  const principal = price - deposit;
+  let upfrontRate = 0;
+  let annualMI = 0;
+  if (kind === 'fha') {
+    upfrontRate = .0175;
+    annualMI = years <= 15 ? (down >= 10 ? .0015 : .004) : (down >= 5 ? .005 : .0055);
+  } else if (kind === 'usda') {
+    upfrontRate = .01;
+    annualMI = .0035;
+  } else if (kind === 'va' && !exempt) {
+    upfrontRate = down >= 10 ? .0125 : down >= 5 ? .015 : .0215;
+  } else if (kind === 'conventional' && down < 20) {
+    annualMI = .006;
+  }
+  const loan = principal + principal * upfrontRate;
+  const months = years * 12;
+  const r = rate / 1200;
+  const pi = r === 0 ? loan / months : loan * r / -Math.expm1(-months * Math.log1p(r));
+  const monthly = [
+    ['Principal e intereses', pi, '#087865'],
+    ['Seguro de propiedad', price * home / 1200, '#266d9e'],
+    ['Seguro hipotecario / garantía', principal * annualMI / 12, '#6b53a1'],
+    ['CRIM estimado', price * tax / 1200, '#a36b22'],
+    ['Mantenimiento', hoa, '#536c75']
+  ];
+  const total = monthly.reduce((sum, item) => sum + item[1], 0);
+  const fees = price * closing / 100;
+  return {monthly, total, initial:[
+    ['Pronto', deposit], ['Gastos de cierre', fees],
+    ['Efectivo inicial estimado', deposit + fees], ['Préstamo con cargos financiados', loan]
+  ]};
+}
+function propertyScore() {
+  const answers = Object.fromEntries(questions.map(([id]) => [id, get(id).value]));
+  const rural = answers.rural === 'yes';
+  const weights = {area:rural ? 0 : 2, rooms:3, baths:3, terrace:1, parking:1, gate:1, shops:2, yard:rural ? 2 : 1, land:rural ? 3 : 1};
+  const scores = {
+    area:Number(answers.area === 'yes'),
+    rooms:Math.min(1, Math.max(0, (Number(answers.rooms) - 1) / 2)),
+    baths:Math.min(1, Math.max(0, (Number(answers.baths) - 1) / 1.5)),
+    terrace:Number(answers.terrace === 'yes'),
+    parking:Number(answers.parking === 'yes'),
+    gate:Number(answers.gate === 'yes'),
+    shops:Number(answers.shops === 'yes'),
+    yard:Number(answers.yard === 'yes'),
+    land:Math.min(1, Number(answers.land) / 1.5)
+  };
+  let points = 0;
+  let possible = 0;
+  for (const [id, weight] of Object.entries(weights)) {
+    if (!answers[id]) continue;
+    points += weight * scores[id];
+    possible += weight;
+  }
+  const count = Object.values(answers).filter(Boolean).length;
+  return {count, limited:count >= 6 && possible > 0 && points / possible < .45};
+}
+function thresholds(total, debt) {
+  return {
+    yellow:Math.max(total / .35, (total + debt) / .43),
+    green:Math.max(total / .28, (total + debt) / .36)
+  };
+}
+function renderAssessment(price, total) {
+  const result = get('assessment');
+  const ranges = get('income-ranges');
+  const income = number('income');
+  const debt = get('debt').value === '' && get('debt').validity.valid ? 0 : number('debt');
+  const profile = propertyScore();
+  result.dataset.color = '';
+  ranges.hidden = true;
+  if (total === null) {
+    result.textContent = 'Completa los datos de la hipoteca para evaluar la compra.';
+    return '';
+  }
+  if (!get('debt').validity.valid || !get('income').validity.valid) {
+    result.textContent = 'Revisa los valores de ingreso y deudas.';
+    return '';
+  }
+
+  const limits = thresholds(total, debt);
+  const yellowStart = Math.max(1, Math.ceil(limits.yellow));
+  const greenStart = Math.max(1, Math.ceil(limits.green));
+  const rows = [];
+  if (yellowStart > 1) rows.push(['red','Rojo', 'Menos de ' + whole.format(yellowStart)]);
+  if (profile.limited) {
+    rows.push(['yellow','Amarillo', whole.format(yellowStart) + ' o más']);
+  } else {
+    if (yellowStart < greenStart) rows.push(['yellow','Amarillo', whole.format(yellowStart) + ' a ' + whole.format(greenStart - 1)]);
+    rows.push(['green','Verde', whole.format(greenStart) + ' o más']);
+  }
+  get('range-caption').textContent = 'Con una propiedad de ' + money.format(price) + ' y ' + money.format(debt) + ' en otras deudas al mes. Rangos en dólares enteros.';
+  get('range-body').innerHTML = rows.map(([color, name, band]) =>
+    '<tr><td>' + band + '</td><td class="pill ' + color + '">' + name + '</td></tr>').join('');
+  ranges.hidden = false;
+
+  if (!Number.isFinite(income)) {
+    result.textContent = 'Entra tu ingreso bruto mensual para ver tu color.';
+    return '';
+  }
+  const budgetColor = income < limits.yellow ? 'red' : income < limits.green ? 'yellow' : 'green';
+  const color = budgetColor === 'green' && profile.limited ? 'yellow' : budgetColor;
+  const ratios = 'Vivienda: ' + percent.format(total / income) + ' del ingreso. Vivienda y deudas: ' + percent.format((total + debt) / income) + '.';
+  let note = '';
+  if (budgetColor === 'green' && profile.limited) note = ' El pago entra en el rango verde, pero la combinación de características baja la evaluación a amarillo.';
+  else if (budgetColor === 'red') note = ' El pago supera los límites de este presupuesto.';
+  else if (profile.count < 6) note = ' Resultado basado en el presupuesto. Responde seis preguntas para incorporar las características.';
+  result.dataset.color = color;
+  const title = document.createElement('strong');
+  title.textContent = titles[color];
+  const description = document.createElement('p');
+  description.className = 'small';
+  description.textContent = ratios + note;
+  result.replaceChildren(title, description);
+  return titles[color];
+}
+function render() {
+  get('copy-status').textContent = '';
+  if (!get('mortgage').checkValidity()) {
+    copyText = '';
+    get('copy').disabled = true;
+    get('result-details').hidden = true;
+    get('total').textContent = '—';
+    get('summary').textContent = 'Completa los campos con valores válidos.';
+    renderAssessment(null, null);
+    return;
+  }
+  const kind = get('type').value;
+  const years = Number(term.value);
+  const rate = number('rate');
+  const price = number('price');
+  const down = number('down');
+  const {monthly, total, initial} = estimate({
+    price, kind, years, rate, down, home:number('home'), tax:number('tax'),
+    hoa:number('hoa'), closing:number('closing'), exempt:get('exempt').checked
+  });
+  const program = programs[kind].name + ' · ' + years + ' años · ' + rate.toFixed(2) + '%';
+  const largest = Math.max(...monthly.map(item => item[1]));
+  get('total').textContent = money.format(total);
+  get('summary').textContent = program + (kind === 'fha' && down < 3.5 ? ' · Simulación con pronto menor de 3.5%' : '');
+  get('breakdown').innerHTML = monthly.map(([label, value, color]) =>
+    '<li><div class="bar-label"><span>' + label + '</span><strong>' + money.format(value) +
+    '</strong></div><div class="track" aria-hidden="true"><span class="bar" style="--bar:' + color +
+    ';width:' + (largest > 0 ? value / largest * 100 : 0) + '%"></span></div></li>').join('');
+  get('initial').innerHTML = initial.map(([label, value], index) =>
+    '<div class="row' + (index === 2 ? ' emphasis' : '') + '"><dt>' + label +
+    '</dt><dd>' + money.format(value) + '</dd></div>').join('');
+  get('result-details').hidden = false;
+  get('copy').disabled = false;
+  const verdict = renderAssessment(price, total);
+  copyText = ['Calculadora hipotecaria · Puerto Rico', 'Propiedad: ' + money.format(price), program,
+    'Pago mensual estimado: ' + money.format(total),
+    ...[...monthly, ...initial].map(([label, value]) => label + ': ' + money.format(value)),
+    ...(verdict ? ['Semáforo: ' + verdict] : [])
+  ].join('\n');
+}
+
+get('type').addEventListener('change', () => { selectProgram(true); render(); });
+document.querySelectorAll('input').forEach(input => input.addEventListener('input', render));
+term.addEventListener('change', render);
+get('features').addEventListener('change', render);
+get('mortgage').addEventListener('submit', event => {
+  event.preventDefault();
+  render();
+  if (matchMedia('(max-width:740px)').matches) get('results').scrollIntoView({block:'start'});
+});
+get('copy').addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(copyText);
+    get('copy-status').textContent = 'Estimado copiado.';
+  } catch {
+    window.prompt('Copia tu estimado', copyText);
+  }
+});
+selectProgram(false);
+render();
+</script>
+</body>
+</html>
