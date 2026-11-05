@@ -35,7 +35,7 @@ footer{padding:6px 3px 0}footer a{color:var(--accent)}[hidden]{display:none!impo
 <h2 id="property-title">Tu propiedad</h2>
 <form id="mortgage">
 <div class="fields">
-<label class="wide">Valor de la propiedad ($)<input id="price" type="number" inputmode="decimal" min="1" max="100000000" step="any" value="200000" required></label>
+<label class="wide">Valor de la propiedad ($)<input id="price" type="text" inputmode="decimal" value="200,000" autocomplete="off" required></label>
 <label class="wide">Tipo de préstamo<select id="type"><option value="fha">FHA</option><option value="conventional">Convencional</option><option value="usda">USDA Rural</option><option value="va">VA (veteranos elegibles)</option></select></label>
 <label>Plazo<select id="term"><option value="30">30 años</option><option value="20">20 años</option><option value="15">15 años</option></select></label>
 </div>
@@ -110,7 +110,28 @@ footer{padding:6px 3px 0}footer a{color:var(--accent)}[hidden]{display:none!impo
 <script>
 'use strict';
 const get = id => document.getElementById(id);
-const number = id => get(id).valueAsNumber;
+const number = id => id === 'price'
+  ? Number(get(id).value.replaceAll(',', ''))
+  : get(id).valueAsNumber;
+function formatPrice() {
+  const input = get('price');
+  const raw = input.value.replaceAll(',', '');
+  const position = input.selectionStart;
+  const beforeCaret = input.value.slice(0, position).replaceAll(',', '').length;
+  const valid = /^\d+(?:\.\d{0,2})?$/.test(raw) && Number(raw) >= 1 && Number(raw) <= 100000000;
+  input.setCustomValidity(valid || raw === '' ? '' : 'Entra un precio entre $1 y $100,000,000, con hasta dos decimales.');
+  if (!/^\d*(?:\.\d{0,2})?$/.test(raw)) return;
+  const [integer, decimals] = raw.split('.');
+  input.value = integer.replace(/\B(?=(\d{3})+(?!\d))/g, ',') + (decimals === undefined ? '' : '.' + decimals);
+  if (position === null || document.activeElement !== input) return;
+  let caret = 0;
+  let characters = 0;
+  while (caret < input.value.length && characters < beforeCaret) {
+    if (input.value[caret] !== ',') characters++;
+    caret++;
+  }
+  input.setSelectionRange(caret, caret);
+}
 const money = new Intl.NumberFormat('es-PR', {style:'currency', currency:'USD'});
 const whole = new Intl.NumberFormat('es-PR', {style:'currency', currency:'USD', maximumFractionDigits:0});
 const percent = new Intl.NumberFormat('es-PR', {style:'percent', maximumFractionDigits:1});
@@ -360,6 +381,7 @@ function render() {
 }
 
 get('type').addEventListener('change', () => { selectProgram(true); render(); });
+get('price').addEventListener('input', formatPrice);
 document.querySelectorAll('input').forEach(input => input.addEventListener('input', render));
 term.addEventListener('change', render);
 get('features').addEventListener('change', render);
@@ -376,6 +398,7 @@ get('copy').addEventListener('click', async () => {
     window.prompt('Copia tu estimado', copyText);
   }
 });
+formatPrice();
 selectProgram(false);
 render();
 </script>
