@@ -17,6 +17,7 @@ details{border-top:1px solid var(--line);margin-top:16px;padding-top:13px}summar
 .bars{list-style:none;margin:0;padding:0;display:grid;gap:11px}.bar-label,.row{display:flex;align-items:baseline;justify-content:space-between;gap:10px;font-size:.88rem}.bar-label strong,.row dd{font-variant-numeric:tabular-nums;text-align:right;margin:0;overflow-wrap:anywhere}.track{height:7px;background:#edf3f1;border-radius:9px;margin-top:4px;overflow:hidden}.bar{display:block;height:100%;border-radius:inherit;background:var(--bar)}
 .initial{border-top:1px solid var(--line);padding-top:15px;margin-top:20px}.initial dl{margin:0 0 14px}.row{padding:5px 0}.row.emphasis{font-weight:750}.status{min-height:1.4em;margin-top:6px}
 .evaluation{margin-top:18px}.assessment{background:#eef4f2;border:1px solid #dce8e4;border-left:5px solid #7e9893;border-radius:12px;padding:14px;margin-top:13px}.assessment strong{display:block}.assessment p{color:inherit;margin-top:4px}.assessment[data-color="green"]{background:#e5f6eb;color:#145533;border-color:#268456}.assessment[data-color="yellow"]{background:#fff3d5;color:#654600;border-color:#bb830b}.assessment[data-color="red"]{background:#fdebea;color:#822b28;border-color:#bb514b}
+.budget-heading{margin-top:20px}.budget-heading + .signal{margin-top:14px}
 .evaluation .fields{max-width:620px}.evaluation details .fields{max-width:none}.table-wrap{margin-top:15px}.signal{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:24px}.segment,.swatch{background:var(--signal-color)}.segment{position:relative;height:12px;border-radius:6px}.signal[data-color="red"] .red::before,.signal[data-color="yellow"] .yellow::before,.signal[data-color="green"] .green::before{content:"";position:absolute;top:-9px;left:50%;transform:translateX(-50%);border-left:6px solid transparent;border-right:6px solid transparent;border-top:7px solid var(--ink)}.swatch{display:inline-block;width:42px;height:10px;border-radius:5px}.red{--signal-color:#d85752}.yellow{--signal-color:#e4ab24}.green{--signal-color:#269666}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 table{border-collapse:collapse;width:100%;text-align:left;font-size:.85rem}caption{text-align:left;color:var(--muted);padding-bottom:5px}th,td{padding:8px 5px;border-bottom:1px solid var(--line)}
 footer{padding:6px 3px 0}footer a{color:var(--accent)}[hidden]{display:none!important}
@@ -73,9 +74,11 @@ footer{padding:6px 3px 0}footer a{color:var(--accent)}[hidden]{display:none!impo
 <label>Otras deudas mensuales ($)<input id="debt" type="number" inputmode="decimal" min="0" max="100000000" step="any" placeholder="0 si no tienes"></label>
 </div>
 <details id="features-panel" open>
-<summary>10 preguntas sobre la propiedad <span class="muted small">· Opcionales</span></summary>
+<summary>11 preguntas sobre la propiedad <span class="muted small">· Opcionales</span></summary>
 <div class="fields" id="features"></div>
 </details>
+<div class="assessment" id="property-review" aria-live="polite"></div>
+<h3 class="budget-heading">¿Cabe en tu presupuesto?</h3>
 <div class="signal" id="signal" aria-hidden="true">
 <span class="segment red"></span><span class="segment yellow"></span><span class="segment green"></span>
 </div>
@@ -89,8 +92,8 @@ footer{padding:6px 3px 0}footer a{color:var(--accent)}[hidden]{display:none!impo
 </div>
 <details>
 <summary>Cómo se asigna el color</summary>
-<p class="small">Buena opción si la vivienda consume hasta 28% de tu ingreso bruto y, con otras deudas, hasta 36%. Conviene esperar si las cifras superan esos límites pero se mantienen dentro de 35% y 43%, respectivamente. La compra se sale del presupuesto si supera alguno de estos últimos límites. Son criterios de esta herramienta. <a href="https://www.consumerfinance.gov/ask-cfpb/what-is-a-debt-to-income-ratio-en-1791/">Cómo se calcula la proporción de deuda</a>.</p>
-<p class="small">Con seis respuestas o más, la puntuación de características puede cambiar el resultado a «Yo esperaría». Se ponderan cuartos, baños y acceso a servicios. En el campo pesan más el terreno y el patio. El resultado es un filtro de presupuesto y características. Para evaluar el precio de mercado hacen falta ventas comparables y conocer la condición de la vivienda.</p>
+<p class="small">El pago cabe en el presupuesto si la vivienda consume hasta 28% de tu ingreso bruto y, con otras deudas, hasta 36%. Conviene esperar si las cifras superan esos límites pero se mantienen dentro de 35% y 43%, respectivamente. La compra se sale del presupuesto si supera alguno de estos últimos límites. Son criterios de esta herramienta. <a href="https://www.consumerfinance.gov/ask-cfpb/what-is-a-debt-to-income-ratio-en-1791/">Cómo se calcula la proporción de deuda</a>.</p>
+<p class="small">La recomendación sobre la propiedad usa seis respuestas de características como mínimo. Pondera cuartos, baños y acceso a servicios. En el campo pesan más el terreno y el patio. Muchas reparaciones activan una recomendación de cautela de inmediato. Los arreglos se evalúan aparte del pago mensual. Para estimar el valor de mercado hacen falta ventas comparables.</p>
 </details>
 </section>
 <footer>
@@ -130,7 +133,8 @@ const questions = [
   ['shops','¿Está cerca de centros comerciales o supermercados?',yesNo],
   ['yard','¿Tiene patio?',yesNo],
   ['land','¿Cuánto terreno tiene?',[['0','Sin terreno adicional'],['.25','Menos de ½ cuerda'],['.5','½ a menos de 1 cuerda'],['1','1 a menos de 2 cuerdas'],['2','2 cuerdas o más']]],
-  ['rural','¿Queda en el campo?',yesNo]
+  ['rural','¿Queda en el campo?',yesNo],
+  ['repairs','¿Necesita reparación?',[['none','No'],['minor','Muy poca'],['yes','Sí, sin estimar'],['major','Mucha']]]
 ];
 for (const [id, label, options] of questions) {
   const field = document.createElement('label');
@@ -142,7 +146,7 @@ for (const [id, label, options] of questions) {
   field.append(select);
   get('features').append(field);
 }
-const titles = {green:'Buena opción para comprar', yellow:'Yo esperaría', red:'No es buena compra'};
+const titles = {green:'Cabe en tu presupuesto', yellow:'Presupuesto ajustado', red:'Fuera de tu presupuesto'};
 const term = get('term');
 let copyText = '';
 
@@ -211,8 +215,48 @@ function propertyScore() {
     points += weight * scores[id];
     possible += weight;
   }
-  const count = Object.values(answers).filter(Boolean).length;
-  return {count, limited:count >= 6 && possible > 0 && points / possible < .45};
+  const count = questions.filter(([id]) => id !== 'repairs' && answers[id]).length;
+  return {count, score:possible > 0 ? points / possible : 0, repairs:answers.repairs};
+}
+function renderPropertyReview(budgetColor) {
+  const {count, score, repairs} = propertyScore();
+  let title = '¿Vale la pena esta propiedad?';
+  let message = 'Responde al menos seis preguntas de características para ver la recomendación.';
+  let color = '';
+  if (repairs === 'major') {
+    title = 'Buscaría otra opción';
+    message = 'La propiedad necesita muchas reparaciones. Antes de considerarla, habría que inspeccionarla y cotizar los arreglos.';
+    if (budgetColor === 'green') message += ' La mensualidad cabe en tu presupuesto, pero los arreglos pueden cambiar el costo real de la compra.';
+    color = 'red';
+  } else if (count >= 6) {
+    if (score < .45) {
+      title = 'Seguiría buscando';
+      message = 'Por las características indicadas, esta propiedad ofrece pocas ventajas frente a otras opciones.';
+      if (budgetColor === 'green') message += ' Aunque puedas pagarla, buscaría una que te dé más por un precio similar.';
+      color = 'red';
+    } else if (score >= .70 && repairs !== 'yes') {
+      title = 'Excelente por sus características';
+      message = budgetColor === 'red' || budgetColor === 'yellow'
+        ? 'Vale la pena tenerla en el radar. Si baja de precio o mejora tu presupuesto, vuelve a evaluarla.'
+        : 'Por sus características, vale la pena incluirla entre tus opciones.';
+      color = 'green';
+    } else {
+      title = 'La compararía con otras opciones';
+      message = 'Tiene características atractivas. Compáralas con las de otras propiedades de precio similar.';
+      color = 'yellow';
+    }
+  }
+  if (repairs === 'yes') message += ' Antes de decidir, pide un estimado de las reparaciones.';
+  else if (repairs === 'minor') message += ' Separa una partida para los arreglos menores.';
+  const result = get('property-review');
+  result.dataset.color = color;
+  const heading = document.createElement('strong');
+  heading.textContent = title;
+  const description = document.createElement('p');
+  description.className = 'small';
+  description.textContent = message;
+  result.replaceChildren(heading, description);
+  return color ? title : '';
 }
 function thresholds(total, debt) {
   return {
@@ -225,7 +269,6 @@ function renderAssessment(price, total) {
   const ranges = get('income-ranges');
   const income = number('income');
   const debt = get('debt').value === '' && get('debt').validity.valid ? 0 : number('debt');
-  const profile = propertyScore();
   const signal = get('signal');
   result.dataset.color = '';
   signal.dataset.color = '';
@@ -244,12 +287,8 @@ function renderAssessment(price, total) {
   const greenStart = Math.max(1, Math.ceil(limits.green));
   const rows = [];
   if (yellowStart > 1) rows.push(['red', 'Menos de ' + whole.format(yellowStart)]);
-  if (profile.limited) {
-    rows.push(['yellow', whole.format(yellowStart) + ' o más']);
-  } else {
-    if (yellowStart < greenStart) rows.push(['yellow', whole.format(yellowStart) + ' a ' + whole.format(greenStart - 1)]);
-    rows.push(['green', whole.format(greenStart) + ' o más']);
-  }
+  if (yellowStart < greenStart) rows.push(['yellow', whole.format(yellowStart) + ' a ' + whole.format(greenStart - 1)]);
+  rows.push(['green', whole.format(greenStart) + ' o más']);
   get('range-caption').textContent = 'Con una propiedad de ' + money.format(price) + ' y ' + money.format(debt) + ' en otras deudas al mes. Rangos en dólares enteros.';
   get('range-body').innerHTML = rows.map(([color, band]) =>
     '<tr><td>' + band + '</td><td><span class="swatch ' + color +
@@ -260,22 +299,17 @@ function renderAssessment(price, total) {
     result.textContent = 'Entra tu ingreso bruto mensual para ubicarte en la barra.';
     return '';
   }
-  const budgetColor = income < limits.yellow ? 'red' : income < limits.green ? 'yellow' : 'green';
-  const color = budgetColor === 'green' && profile.limited ? 'yellow' : budgetColor;
+  const color = income < limits.yellow ? 'red' : income < limits.green ? 'yellow' : 'green';
   const ratios = 'Vivienda: ' + percent.format(total / income) + ' del ingreso. Vivienda y deudas: ' + percent.format((total + debt) / income) + '.';
-  let note = '';
-  if (budgetColor === 'green' && profile.limited) note = ' El pago cabe en el presupuesto, pero la combinación de características aconseja esperar.';
-  else if (budgetColor === 'red') note = ' El pago supera los límites de este presupuesto.';
-  else if (profile.count < 6) note = ' Resultado basado en el presupuesto. Responde seis preguntas para incorporar las características.';
   result.dataset.color = color;
   signal.dataset.color = color;
   const title = document.createElement('strong');
   title.textContent = titles[color];
   const description = document.createElement('p');
   description.className = 'small';
-  description.textContent = ratios + note;
+  description.textContent = ratios;
   result.replaceChildren(title, description);
-  return titles[color];
+  return color;
 }
 function render() {
   get('copy-status').textContent = '';
@@ -286,6 +320,7 @@ function render() {
     get('total').textContent = '—';
     get('summary').textContent = 'Completa los campos con valores válidos.';
     renderAssessment(null, null);
+    renderPropertyReview('');
     return;
   }
   const kind = get('type').value;
@@ -314,11 +349,13 @@ function render() {
     '</dt><dd>' + money.format(value) + '</dd></div>').join('');
   get('result-details').hidden = false;
   get('copy').disabled = false;
-  const verdict = renderAssessment(price, total);
+  const budgetColor = renderAssessment(price, total);
+  const propertyVerdict = renderPropertyReview(budgetColor);
   copyText = ['Calculadora hipotecaria · Puerto Rico', 'Propiedad: ' + money.format(price), program,
     'Pago mensual estimado: ' + money.format(total),
     ...[...monthly, ...initial].map(([label, value]) => label + ': ' + money.format(value)),
-    ...(verdict ? ['Semáforo: ' + verdict] : [])
+    ...(budgetColor ? ['Presupuesto: ' + titles[budgetColor]] : []),
+    ...(propertyVerdict ? ['Propiedad: ' + propertyVerdict] : [])
   ].join('\n');
 }
 
