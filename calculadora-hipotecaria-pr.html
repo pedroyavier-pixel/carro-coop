@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="Calcula el pago mensual de una vivienda en Puerto Rico y compáralo con tu ingreso.">
-<title>Calculadora hipotecaria | Puerto Rico</title>
+<title>¿Me da pa la casa? | Puerto Rico</title>
 <style>
 :root{color-scheme:light;--ink:#142b32;--muted:#496269;--line:#dbe6e3;--accent:#00675a;--paper:#fff;font:16px/1.5 system-ui,-apple-system,sans-serif;color:var(--ink);background:#eff5f2}
 *{box-sizing:border-box}body{margin:0}main{max-width:1120px;margin:auto;padding:44px 24px 36px}
@@ -27,7 +27,7 @@ footer{padding:6px 3px 0}footer a{color:var(--accent)}[hidden]{display:none!impo
 <body><main>
 <header>
 <div class="eyebrow">Puerto Rico · Estimador independiente</div>
-<h1>Calculadora hipotecaria</h1>
+<h1>¿Me da pa la casa?</h1>
 <p>Calcula tu pago mensual, el efectivo para el cierre y cómo la compra encaja en tu presupuesto.</p>
 </header>
 <div class="grid">
@@ -351,7 +351,7 @@ function render() {
   get('copy').disabled = false;
   const budgetColor = renderAssessment(price, total);
   const propertyVerdict = renderPropertyReview(budgetColor);
-  copyText = ['Calculadora hipotecaria · Puerto Rico', 'Propiedad: ' + money.format(price), program,
+  copyText = ['¿Me da pa la casa? · Puerto Rico', 'Propiedad: ' + money.format(price), program,
     'Pago mensual estimado: ' + money.format(total),
     ...[...monthly, ...initial].map(([label, value]) => label + ': ' + money.format(value)),
     ...(budgetColor ? ['Presupuesto: ' + titles[budgetColor]] : []),
